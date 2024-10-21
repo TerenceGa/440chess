@@ -65,7 +65,7 @@ public class AlphaBetaAgent
 		 * @param depth how far in the tree we are rn
 		 * @param alpha
 		 * @param beta
-		 * @return
+		 * @return The child node representing the best move from the current node.
 		 */
 		public DFSTreeNode alphaBetaSearch(DFSTreeNode node,
                                            int depth,
@@ -73,6 +73,64 @@ public class AlphaBetaAgent
                                            double beta)
 		{
 			DFSTreeNode bestChild = null;
+			if(node.isTerminal()){ // terminal state!
+				bestChild = node;
+			}else if (depth <= 0){// reached the end of the depth!
+
+				// set the utility value for the node by using the heuristic value
+				node.setMaxPlayerUtilityValue(CustomHeuristics.getMaxPlayerHeuristicValue(node));
+				bestChild = node;
+
+			} else{ // can keep going to find the best value
+
+				List<DFSTreeNode> children = node.getChildren();
+				double bestUtilityValue; // reference for the best utility value fistly using infinity
+
+				if(node.getType() == DFSTreeNodeType.MAX){// max platyer
+					double bestValue = Double.NEGATIVE_INFINITY;
+					for (DFSTreeNode child : children){
+						// recursively call the alphaBetaSearch method to find the best child
+						DFSTreeNode childNode = alphaBetaSearch(child, depth - 1, alpha, beta);
+						double value = childNode.getMaxPlayerUtilityValue();
+
+						if(value > bestValue){ 
+							bestValue = value;
+							bestChild = childNode;
+						}
+
+					// update the alpha value
+						alpha = Math.max(alpha, bestValue);
+						if(beta <= alpha){ // beta cut-off
+							break;
+						}
+						
+					}
+					node.setMaxPlayerUtilityValue(bestValue);
+
+			}
+				else { // min player
+					double bestValue = Double.POSITIVE_INFINITY;
+					for (DFSTreeNode child : children){
+						// recursively call the alphaBetaSearch method to find the best child
+						DFSTreeNode childNode = alphaBetaSearch(child, depth - 1, alpha, beta);
+						double value = childNode.getMaxPlayerUtilityValue();
+
+						if(value < bestValue){ 
+							bestValue = value;
+							bestChild = childNode;
+						}
+
+					// update the beta value
+						beta = Math.min(beta, bestValue);
+						if(beta <= alpha){ // alpha cut-off
+							break;
+						}
+						
+					}
+					node.setMaxPlayerUtilityValue(bestValue);
+
+				}
+		}
 			return bestChild;
 		}
 
